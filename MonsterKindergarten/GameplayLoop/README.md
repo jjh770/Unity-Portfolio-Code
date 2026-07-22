@@ -6,10 +6,10 @@
 
 | 파일 | 역할 |
 |---|---|
-| `Clicker.cs` | 누른 시간과 이동 거리로 클릭·드래그를 구분합니다. |
-| `PointCalculator.cs` | 수동·자동 클릭별 고정·비율 업그레이드를 조합해 획득량을 계산합니다. |
-| `MergeManager.cs` | 같은 등급 여부를 검증하고 상위 등급 변경, 상태 저장, 풀 반환을 조정합니다. |
-| `SpawnManager.cs` | 저장된 활성 슬라임 복원, 자동 생성과 스폰 관련 업그레이드를 적용합니다. |
+| [`Clicker.cs`](./Clicker.cs) | 누른 시간과 이동 거리로 클릭·드래그를 구분합니다. |
+| [`PointCalculator.cs`](./PointCalculator.cs) | 수동·자동 클릭별 고정·비율 업그레이드를 조합해 획득량을 계산합니다. |
+| [`MergeManager.cs`](./MergeManager.cs) | 같은 등급 여부를 검증하고 상위 등급 변경, 상태 저장, 풀 반환을 조정합니다. |
+| [`SpawnManager.cs`](./SpawnManager.cs) | 저장된 활성 슬라임 복원, 자동 생성과 스폰 관련 업그레이드를 적용합니다. |
 
 ## 게임 루프
 

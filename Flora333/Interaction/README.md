@@ -6,11 +6,11 @@
 
 | 파일 | 역할 |
 |---|---|
-| `IInteractable.cs` | 상호작용 가능 여부, 타입, Transform과 실행 계약을 정의합니다. |
-| `IPickable.cs` | 들기와 던지기 동작을 추가한 상호작용 확장 인터페이스입니다. |
-| `InteractionType.cs` | 대상 선택 우선순위에 사용하는 상호작용 종류입니다. |
-| `PlayerInteraction.cs` | 주변 대상을 수집하고 타입 우선순위와 거리로 현재 대상을 선택합니다. |
-| `PlayerPickUpThrow.cs` | 애니메이션 이벤트에 맞춰 복수 오브젝트를 들고 FIFO 순서로 던집니다. |
+| [`IInteractable.cs`](./IInteractable.cs) | 상호작용 가능 여부, 타입, Transform과 실행 계약을 정의합니다. |
+| [`IPickable.cs`](./IPickable.cs) | 들기와 던지기 동작을 추가한 상호작용 확장 인터페이스입니다. |
+| [`InteractionType.cs`](./InteractionType.cs) | 대상 선택 우선순위에 사용하는 상호작용 종류입니다. |
+| [`PlayerInteraction.cs`](./PlayerInteraction.cs) | 주변 대상을 수집하고 타입 우선순위와 거리로 현재 대상을 선택합니다. |
+| [`PlayerPickUpThrow.cs`](./PlayerPickUpThrow.cs) | 애니메이션 이벤트에 맞춰 복수 오브젝트를 들고 FIFO 순서로 던집니다. |
 
 ## 설계 포인트
 

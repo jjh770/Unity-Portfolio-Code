@@ -6,11 +6,11 @@
 
 | 파일 | 역할 |
 |---|---|
-| `PlayerStateManager.cs` | 현재 상태와 상태 전환 규칙, 행동 가능 여부를 중앙 관리합니다. |
-| `PlayerInputHandler.cs` | Unity 입력을 행동 이벤트로 변환하고 이동 입력을 보관합니다. |
-| `TweenMovement.cs` | 공격·대시의 선형 이동과 스킬의 포물선 이동을 공통 처리합니다. |
-| `PlayerAttack.cs` | 콤보, 공격 취소, 애니메이션 이벤트와 판정 구간을 연결합니다. |
-| `PlayerDash.cs` | 상태와 쿨타임을 확인한 뒤 TweenMovement로 대시를 실행합니다. |
+| [`PlayerStateManager.cs`](./PlayerStateManager.cs) | 현재 상태와 상태 전환 규칙, 행동 가능 여부를 중앙 관리합니다. |
+| [`PlayerInputHandler.cs`](./PlayerInputHandler.cs) | Unity 입력을 행동 이벤트로 변환하고 이동 입력을 보관합니다. |
+| [`TweenMovement.cs`](./TweenMovement.cs) | 공격·대시의 선형 이동과 스킬의 포물선 이동을 공통 처리합니다. |
+| [`PlayerAttack.cs`](./PlayerAttack.cs) | 콤보, 공격 취소, 애니메이션 이벤트와 판정 구간을 연결합니다. |
+| [`PlayerDash.cs`](./PlayerDash.cs) | 상태와 쿨타임을 확인한 뒤 TweenMovement로 대시를 실행합니다. |
 
 ## 흐름
 

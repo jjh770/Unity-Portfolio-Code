@@ -6,11 +6,11 @@
 
 | 파일 | 역할 |
 |---|---|
-| `IRepository.cs` | 저장 데이터의 비동기 Save·Load 계약을 정의합니다. |
-| `ISaveData.cs` | 충돌 해결에 사용할 마지막 저장 시각을 공통으로 요구합니다. |
-| `HybridRepository.cs` | 로컬 즉시 저장, Firebase 디바운스 저장, 병렬 로드와 최신 데이터 선택을 담당합니다. |
-| `PlayerPrefsSlimeStatusRepository.cs` | 슬라임 상태를 JsonUtility 호환 Wrapper로 변환해 사용자별 PlayerPrefs에 저장합니다. |
-| `FirebaseSlimeStatusRepository.cs` | 동일한 저장 계약으로 Firestore 문서를 저장·로드합니다. |
+| [`IRepository.cs`](./IRepository.cs) | 저장 데이터의 비동기 Save·Load 계약을 정의합니다. |
+| [`ISaveData.cs`](./ISaveData.cs) | 충돌 해결에 사용할 마지막 저장 시각을 공통으로 요구합니다. |
+| [`HybridRepository.cs`](./HybridRepository.cs) | 로컬 즉시 저장, Firebase 디바운스 저장, 병렬 로드와 최신 데이터 선택을 담당합니다. |
+| [`PlayerPrefsSlimeStatusRepository.cs`](./PlayerPrefsSlimeStatusRepository.cs) | 슬라임 상태를 JsonUtility 호환 Wrapper로 변환해 사용자별 PlayerPrefs에 저장합니다. |
+| [`FirebaseSlimeStatusRepository.cs`](./FirebaseSlimeStatusRepository.cs) | 동일한 저장 계약으로 Firestore 문서를 저장·로드합니다. |
 
 ## 저장 흐름
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * 역할: 로컬 Repository와 Firebase Repository를 결합해 즉시 저장, 서버 디바운스와 최신 데이터 선택을 제공합니다.
  * 핵심 설계: 빈번한 클리커 데이터 변경은 로컬에 즉시 기록하고 마지막 변경만 서버에 전송합니다.
  */
@@ -85,7 +85,8 @@ public class HybridRepository<T> : IRepository<T> where T : class, ISaveData
     }
 
     /// <summary>
-    /// 두 데이터의 LastSaveTime을 비교해 최신 버전을 선택하고 오래된 로컬 데이터를 보정합니다.
+    /// 두 데이터의 LastSaveTime을 비교해 최신 버전을 선택합니다.
+    /// Firebase 데이터가 더 최신이면 로컬 저장소도 해당 데이터로 갱신합니다.
     /// </summary>
     private T ResolveConflict(T playerprefs, T firebase)
     {

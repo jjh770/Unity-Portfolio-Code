@@ -6,9 +6,9 @@
 
 | 파일 | 역할 |
 |---|---|
-| `PlayerSkillController.cs` | 해금·레벨·쿨타임·상태 전환과 애니메이션 이벤트를 관리합니다. |
-| `PlayerSkillRange.cs` | 근접 범위 판정과 레벨별 투사체 생성 구성을 담당합니다. |
-| `SkillProjectile.cs` | 설정 구조체를 받아 이동·범위 판정·중복 타격 방지·풀 반환을 수행합니다. |
+| [`PlayerSkillController.cs`](./PlayerSkillController.cs) | 해금·레벨·쿨타임·상태 전환과 애니메이션 이벤트를 관리합니다. |
+| [`PlayerSkillRange.cs`](./PlayerSkillRange.cs) | 근접 범위 판정과 레벨별 투사체 생성 구성을 담당합니다. |
+| [`SkillProjectile.cs`](./SkillProjectile.cs) | 설정 구조체를 받아 이동·범위 판정·중복 타격 방지·풀 반환을 수행합니다. |
 
 ## 실행 흐름
 

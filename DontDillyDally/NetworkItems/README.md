@@ -6,9 +6,9 @@ PhotonView 소유권, 아이템 보유 상태, 컨테이너 적재 상태와 오
 
 | 파일 | 역할 |
 |---|---|
-| `NetworkItemOwnership.cs` | 소유권 요청·반환·타임아웃·콜백과 동시 획득 경쟁 상태를 관리합니다. |
-| `HoldableItemNetworkSync.cs` | 위치·회전뿐 아니라 보유자와 컨테이너 적재 상태를 커스텀 직렬화합니다. |
-| `ItemRecycleUtility.cs` | 마스터가 네트워크 오브젝트를 안전하게 회수할 수 있도록 소유권 확보 후 제거합니다. |
+| [`NetworkItemOwnership.cs`](./NetworkItemOwnership.cs) | 소유권 요청·반환·타임아웃·콜백과 동시 획득 경쟁 상태를 관리합니다. |
+| [`HoldableItemNetworkSync.cs`](./HoldableItemNetworkSync.cs) | 위치·회전뿐 아니라 보유자와 컨테이너 적재 상태를 커스텀 직렬화합니다. |
+| [`ItemRecycleUtility.cs`](./ItemRecycleUtility.cs) | 마스터가 네트워크 오브젝트를 안전하게 회수할 수 있도록 소유권 확보 후 제거합니다. |
 
 ## 핵심 흐름
 

@@ -119,8 +119,10 @@ public class HoldableItemNetworkSync : MonoBehaviour, IPunOwnershipCallbacks
             bool shouldSnap = becameUnstored || _snapOnNextReceive;
             if (_firstReceive && !shouldSnap && IsNearWorldOrigin(_networkPosition) && !IsNearWorldOrigin(transform.position))
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 int vid = _photonView != null ? _photonView.ViewID : -1;
                 Debug.LogWarning($"[HoldableSync] Ignored first near-origin transform vid={vid} net={_networkPosition} current={transform.position}");
+#endif
                 _networkPosition = transform.position;
                 _networkRotation = transform.rotation;
             }
@@ -131,8 +133,10 @@ public class HoldableItemNetworkSync : MonoBehaviour, IPunOwnershipCallbacks
 
                 if (_networkPosition.sqrMagnitude < 4.0f)
                 {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                     int vid = _photonView != null ? _photonView.ViewID : -1;
                     Debug.LogWarning($"[HoldableSync] HardSnap near-origin vid={vid} net={_networkPosition} becameUnstored={becameUnstored} snapOnNext={_snapOnNextReceive}");
+#endif
                 }
             }
 

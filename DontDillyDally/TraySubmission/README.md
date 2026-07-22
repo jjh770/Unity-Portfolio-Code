@@ -6,8 +6,8 @@
 
 | 파일 | 역할 |
 |---|---|
-| `TraySubmissionHandler.cs` | 요청 시퀀스, 응답 타임아웃, 마스터 검증, 승인·거절 콜백을 관리합니다. |
-| `StageFlowRpcHandler.cs` | 스테이지 공용 RPC 허브입니다. 포트폴리오에서는 트레이 요청·응답 및 ACK 관련 구간이 핵심입니다. |
+| [`TraySubmissionHandler.cs`](./TraySubmissionHandler.cs) | 요청 시퀀스, 응답 타임아웃, 마스터 검증, 승인·거절 콜백을 관리합니다. |
+| [`StageFlowRpcHandler.cs`](./StageFlowRpcHandler.cs) | 스테이지 공용 RPC 허브입니다. 포트폴리오에서는 트레이 요청·응답 및 ACK 관련 구간이 핵심입니다. |
 
 ## 제출 흐름
 

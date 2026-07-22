@@ -6,12 +6,12 @@
 
 | 파일 | 역할 |
 |---|---|
-| `Currency.cs` | 음수 금지, 통일된 표시, 연산과 비교 규칙을 가진 재화 값 객체입니다. |
-| `CurrencyManager.cs` | 재화 CRUD, 변경 이벤트와 Repository 저장을 조정합니다. |
-| `Upgrade.cs` | 비용·효과·최대 레벨·레벨업 규칙을 가진 업그레이드 도메인입니다. |
-| `UpgradeManager.cs` | 업그레이드와 재화 도메인의 협력, 저장과 이벤트를 관리합니다. |
-| `SlimeStatus.cs` | 최고 해금 등급과 등급별 활성 개수의 불변 규칙을 관리합니다. |
-| `SlimeManager.cs` | 스펙 데이터, 런타임 상태와 Repository를 연결하고 머지 결과를 저장합니다. |
+| [`Currency.cs`](./Currency.cs) | 음수 금지, 통일된 표시, 연산과 비교 규칙을 가진 재화 값 객체입니다. |
+| [`CurrencyManager.cs`](./CurrencyManager.cs) | 재화 CRUD, 변경 이벤트와 Repository 저장을 조정합니다. |
+| [`Upgrade.cs`](./Upgrade.cs) | 비용·효과·최대 레벨·레벨업 규칙을 가진 업그레이드 도메인입니다. |
+| [`UpgradeManager.cs`](./UpgradeManager.cs) | 업그레이드와 재화 도메인의 협력, 저장과 이벤트를 관리합니다. |
+| [`SlimeStatus.cs`](./SlimeStatus.cs) | 최고 해금 등급과 등급별 활성 개수의 불변 규칙을 관리합니다. |
+| [`SlimeManager.cs`](./SlimeManager.cs) | 스펙 데이터, 런타임 상태와 Repository를 연결하고 머지 결과를 저장합니다. |
 
 ## 계층
 

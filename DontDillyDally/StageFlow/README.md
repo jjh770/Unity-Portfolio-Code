@@ -6,9 +6,9 @@
 
 | 파일 | 역할 |
 |---|---|
-| `StagePreloader.cs` | 역할 배정과 환자·질병 데이터 생성을 컷씬 중 선행 처리하고 완료 상태를 노출합니다. |
-| `StageFlowBootstrapper.cs` | 씬 전환 사이에서 데이터를 보존하고 Gameplay의 `StageFlowManager` 준비를 기다린 뒤 초기화합니다. |
-| `StageRpcAckCoordinator.cs` | RPC 전파 후 클라이언트별 ACK를 추적하고, 최초 타임아웃 이후에도 백그라운드 재전송을 수행합니다. |
+| [`StagePreloader.cs`](./StagePreloader.cs) | 역할 배정과 환자·질병 데이터 생성을 컷씬 중 선행 처리하고 완료 상태를 노출합니다. |
+| [`StageFlowBootstrapper.cs`](./StageFlowBootstrapper.cs) | 씬 전환 사이에서 데이터를 보존하고 Gameplay의 `StageFlowManager` 준비를 기다린 뒤 초기화합니다. |
+| [`StageRpcAckCoordinator.cs`](./StageRpcAckCoordinator.cs) | RPC 전파 후 클라이언트별 ACK를 추적하고, 최초 타임아웃 이후에도 백그라운드 재전송을 수행합니다. |
 
 ## 실행 흐름
 
