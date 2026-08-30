@@ -1,6 +1,7 @@
 # Monster Kindergarten — Code Samples
 
-1인 개발 Android 방치형 클리커 게임에서 게임 규칙과 저장 구현을 분리하고, 로컬·Firebase 동기화와 오프라인 보상 흐름을 구성한 핵심 코드 샘플입니다.
+1인 개발 Android 방치형 머지·수집 게임에서 콘텐츠 확장 과정에 맞춰 저장 구조를 개체 단위로 전환하고,
+로컬·Firestore 저장, 입력·HUD 상태 관리, 도감 누적 기록 구조를 구성한 핵심 코드 샘플입니다.
 
 ## 프로젝트 정보
 
@@ -14,67 +15,71 @@
 
 ## 핵심 문제
 
-- 클릭·자동 획득·머지로 저장 요청이 자주 발생하는 문제
-- 로컬 데이터와 Firebase 데이터의 저장 시점이 달라 충돌할 수 있는 문제
-- Android 계정별 진행 데이터를 Firebase UID 기준으로 분리해야 하는 문제
-- 미접속 시간만이 아니라 보유 슬라임의 성장 상태를 반영한 오프라인 보상이 필요한 문제
-- 오프라인 보상 수령·연출 중 자동 생산과 스폰이 함께 진행되면 재화 흐름이 섞일 수 있는 문제
+- 등급별 개수 저장만으로는 장식장에 이동한 동일 등급 슬라임을 개별적으로 구분하기 어려운 문제
+- 저장 구조가 변경된 뒤에도 기존 사용자의 진행 데이터를 유지해야 하는 문제
+- 클릭·자동 생산 등 잦은 데이터 변경마다 Firestore 저장을 요청하면 불필요한 쓰기가 반복되는 문제
+- 장식장 선택·관찰, 튜토리얼, 모달 UI가 입력과 HUD 상태를 직접 변경하면서 종료 순서에 따라 상태가 잘못 복원될 수 있는 문제
+- 도감에 자연 생성·머지·터치·생산량 등 누적 기록이 추가되면서 데이터 변경 빈도가 크게 늘어난 문제
 
 ## 구조 요약
 
 ```mermaid
 flowchart TD
-    A[Currency / Upgrade / Slime Domain] --> B[Manager]
-    B --> C[IRepository T]
-    C --> D[HybridRepository]
-    D --> E[PlayerPrefs 즉시 저장]
-    D --> F[Firebase 디바운스 저장]
-    E --> G[LastSaveTime 비교]
-    F --> G
+    A[Legacy Grade + Count Save] --> B[SchemaVersion 확인]
+    B --> C[Save Data Migration]
+    C --> D[InstanceId + Grade + Location]
 
-    G --> H[GameManager Offline Reward]
-    I[Active Slimes] --> H
-    J[PointCalculator] --> H
-    H --> K[보상 대기]
-    K --> L[보상 수령 / 연출 완료]
-    L --> M[Gameplay 재개]
+    D --> E[HybridRepository]
+    E --> F[PlayerPrefs 즉시 저장]
+    E --> G[Firestore 0.6초 디바운스]
+    F --> H[LastSaveTime 비교]
+    G --> H
+
+    I[Selection / Tutorial / Modal] --> J[Clicker 요청 등록]
+    J --> K[Priority 기준 입력 모드 선택]
+
+    I --> L[HudVisibility 요청 등록]
+    L --> M[남은 요청 기준 HUD 상태 유지]
+
+    N[Spawn / Merge / Touch / Production] --> O[NormalSlimeCollectionStats]
+    O --> P[Dirty]
+    P --> Q[30초 / Pause / Quit 저장]
 ```
 
 ## 폴더
 
 | 폴더 | 내용 |
 |---|---|
-| [SaveArchitecture](./SaveArchitecture/README.md) | Repository 추상화, 로컬 즉시 저장, Firebase 디바운스, 최신 데이터 선택 |
-| [DomainArchitecture](./DomainArchitecture/README.md) | 재화·업그레이드·슬라임 상태의 핵심 규칙과 Manager 협력 |
-| [GameplayLoop](./GameplayLoop/README.md) | 클릭·자동 생산·머지·스폰과 업그레이드 효과 연결 |
-| [OfflineReward](./OfflineReward/README.md) | 마지막 저장 시각과 보유 슬라임 자동 생산량 기반 오프라인 보상 |
-| [Feedback](./Feedback/README.md) | `IFeedback` 기반 컴포넌트 분리와 대표 스케일 피드백 구현 |
+| [SaveDataMigration](./SaveDataMigration/README.md) | 등급별 Count 저장을 InstanceId 기반 개체 저장으로 전환하고 SchemaVersion 기반 마이그레이션을 수행합니다. |
+| [HybridRepository](./HybridRepository/README.md) | PlayerPrefs 즉시 저장, Firestore 디바운스 저장, 병렬 로드와 최신 데이터 선택을 담당합니다. |
+| [InputUIState](./InputUIState/README.md) | owner·priority 기반 입력 요청과 owner별 HUD 숨김 요청으로 기능 간 상태 충돌을 줄입니다. |
+| [CollectionData](./CollectionData/README.md) | 도감의 등급별 누적 기록을 집계하고 Dirty 상태와 저장 주기로 저장 빈도를 관리합니다. |
 
 ## 핵심 구현 기준 읽기 순서
 
-### 저장 구조
+### 개체 저장과 마이그레이션
 
-1. [`IRepository.cs`](./SaveArchitecture/IRepository.cs)
-2. [`HybridRepository.cs`](./SaveArchitecture/HybridRepository.cs)
-3. [`CurrencyManager.cs`](./DomainArchitecture/CurrencyManager.cs)
+1. [`ISaveData.cs`](./SaveDataMigration/ISaveData.cs)
+2. [`SlimeInstanceSaveData.cs`](./SaveDataMigration/SlimeInstanceSaveData.cs)
+3. [`SlimeStatusSaveData.cs`](./SaveDataMigration/SlimeStatusSaveData.cs)
+4. [`PlayerPrefsSlimeStatusRepository.cs`](./SaveDataMigration/PlayerPrefsSlimeStatusRepository.cs)
+5. [`FirebaseSlimeStatusRepository.cs`](./SaveDataMigration/FirebaseSlimeStatusRepository.cs)
 
-### 오프라인 보상
+### 로컬·클라우드 저장
 
-4. [`GameManager.cs`](./OfflineReward/GameManager.cs)
-5. [`PointCalculator.cs`](./GameplayLoop/PointCalculator.cs)
-6. [`AutoClicker.cs`](./GameplayLoop/AutoClicker.cs)
-7. [`SpawnManager.cs`](./GameplayLoop/SpawnManager.cs)
+6. [`IRepository.cs`](./HybridRepository/IRepository.cs)
+7. [`HybridRepository.cs`](./HybridRepository/HybridRepository.cs)
 
-### 도메인 및 추가 구현
+### 입력·UI 상태 관리
 
-8. [`Currency.cs`](./DomainArchitecture/Currency.cs)
-9. [`Upgrade.cs`](./DomainArchitecture/Upgrade.cs)
-10. [`UpgradeManager.cs`](./DomainArchitecture/UpgradeManager.cs)
-11. [`SlimeStatus.cs`](./DomainArchitecture/SlimeStatus.cs)
-12. [`Clicker.cs`](./GameplayLoop/Clicker.cs)
-13. [`MergeManager.cs`](./GameplayLoop/MergeManager.cs)
-14. [`IFeedback.cs`](./Feedback/IFeedback.cs)
-15. [`ScaleTweeningFeedback.cs`](./Feedback/ScaleTweeningFeedback.cs)
+8. [`ClickerInputMode.cs`](./InputUIState/ClickerInputMode.cs)
+9. [`Clicker.cs`](./InputUIState/Clicker.cs)
+10. [`HudVisibility.cs`](./InputUIState/HudVisibility.cs)
+
+### 도감 누적 기록
+
+11. [`NormalSlimeCollectionStats.cs`](./CollectionData/NormalSlimeCollectionStats.cs)
+12. [`SlimeManager.cs`](./CollectionData/SlimeManager.cs)
 
 ## 주요 의존성
 
@@ -82,24 +87,26 @@ flowchart TD
 - UniTask
 - Firebase Authentication / Firestore
 - Google Play Games
-- PlayerPrefs / JsonUtility
+- PlayerPrefs / Newtonsoft.Json
 - DOTween 및 프로젝트 공용 풀 시스템
 
 ## 설계 포인트
 
-- Manager와 Domain은 구체 저장 구현이 아니라 `IRepository<T>`에 의존합니다.
-- 데이터 변경은 로컬에 즉시 저장하고 Firebase 요청은 디바운스로 합칩니다.
-- `LastSaveTime`을 기준으로 로컬과 Firebase 데이터 중 최신 상태를 선택합니다.
-- Android에서는 Firebase UID를 사용자 식별 기준으로 사용해 계정별 저장 데이터를 연결합니다.
-- 오프라인 보상은 `보유 슬라임의 초당 자동 생산량 × 미접속 시간 × 보상 효율`로 계산합니다.
-- 오프라인 보상이 존재하면 자동 생산과 스폰을 멈추고, 수령·연출이 완료된 뒤 Gameplay를 재개합니다.
-- 온라인 자동 생산과 오프라인 생산량 계산은 동일한 `PointCalculator` 규칙을 사용합니다.
+- 같은 등급의 슬라임도 개별 위치와 정보를 유지할 수 있도록 `InstanceId` 기반 개체 저장 구조로 전환했습니다.
+- `SchemaVersion`을 도메인별로 관리하고, 구버전 저장 데이터는 마이그레이션·정규화한 뒤 현재 구조로 다시 저장합니다.
+- 현재 앱보다 높은 저장 버전은 이전 앱에서 덮어쓰지 않도록 로드를 차단합니다.
+- 데이터 변경은 PlayerPrefs에 즉시 저장하고 Firestore 요청은 0.6초 디바운스로 합칩니다.
+- 로드 시 PlayerPrefs와 Firestore를 병렬 조회하고 `LastSaveTime`을 기준으로 최신 진행 데이터를 선택합니다.
+- 입력 상태는 owner별 요청과 `Space < Selection < Tutorial < Modal` 우선순위로 관리합니다.
+- HUD는 owner별 숨김 요청을 누적해 다른 기능의 요청이 남아 있으면 숨김 상태를 유지합니다.
+- 도감 누적 기록은 이벤트마다 즉시 저장하지 않고 Dirty 상태로 표시한 뒤 30초 주기와 Pause·Quit 시점에 저장합니다.
 
 ## 플랫폼 정책
 
-- Android 실제 빌드: Firebase UID 기준 로컬 저장 + Firestore를 결합한 Hybrid Repository
+- Android 실제 빌드: Firebase UID 기준 PlayerPrefs + Firestore를 결합한 Hybrid Repository
 - Editor / 비 Android 환경: 로컬 Repository로 개발·테스트
-- 플랫폼별 저장 구현이 바뀌어도 Manager와 Domain의 게임 규칙은 유지
+- Google Play Games 로그인 → Firebase Authentication → Firebase UID를 사용자 데이터 식별 기준으로 사용
+- 계정 삭제 시 Firebase Authentication 사용자, 현재 UID의 Firestore 진행 데이터, 로컬 진행·튜토리얼 데이터를 함께 삭제
 
 ## 인증 구성
 
@@ -109,5 +116,8 @@ Google Play Games 로그인부터 Firebase Authentication, Firebase UID 연결�
 
 ## 공개 범위
 
-포트폴리오 저장소에는 저장 구조, 도메인 규칙, 플레이 루프와 오프라인 보상 설계를 이해하는 데 필요한 코드만 선별했습니다.  
+포트폴리오 저장소에는 저장 구조, 마이그레이션, 입력·HUD 상태 관리, 도감 누적 기록 설계를 이해하는 데 필요한 코드만 선별했습니다.  
 Google Play Console 설정, Firebase 프로젝트 설정, 전체 UI·연출 구현, 프리팹과 기타 공용 시스템은 전체 프로젝트 및 개발 기록에서 확인할 수 있습니다.
+
+최신 원본 프로젝트:
+https://github.com/jjh770/MonsterKindergarten
