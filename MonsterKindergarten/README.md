@@ -1,7 +1,6 @@
 # Monster Kindergarten — Code Samples
 
-1인 개발 Android 방치형 머지·수집 게임에서 콘텐츠 확장 과정에 맞춰 저장 구조를 개체 단위로 전환하고,
-로컬·Firestore 저장, 입력·HUD 상태 관리, 도감 누적 기록 구조를 구성한 핵심 코드 샘플입니다.
+1인 개발 Android 방치형 머지·수집 게임의 핵심 코드입니다. 단순 기능 나열보다, 콘텐츠가 늘어나는 과정에서 진행 데이터를 안전하게 확장하고 여러 UI·연출의 상태 충돌을 막은 설계 판단을 중심으로 선별했습니다.
 
 ## 프로젝트 정보
 
@@ -11,113 +10,64 @@
 | 개발 시기 | 2026.01.26 ~ 2026.02.10 (초기 제작) / 2026.08 ~ 현재 (출시 개발) |
 | 담당 범위 | 기획, Unity 클라이언트 개발, 데이터·저장 구조 설계, Android 인증·배포 연동 |
 | 개발 환경 | Unity 6, C#, UniTask, Firebase Auth·Firestore, Google Play Games |
-| 대상 플랫폼 | Android (Google Play 내부 테스트) |
+| 대상 플랫폼 | Android |
+| 최신 빌드 | `0.1.15` / Android Version Code `17` (2026-10-02 AAB 생성, 트랙 제출·기기 검증 대기) |
 
-## 핵심 문제
+## 해결한 핵심 문제
 
-- 등급별 개수 저장만으로는 장식장에 이동한 동일 등급 슬라임을 개별적으로 구분하기 어려운 문제
-- 저장 구조가 변경된 뒤에도 기존 사용자의 진행 데이터를 유지해야 하는 문제
-- 클릭·자동 생산 등 잦은 데이터 변경마다 Firestore 저장을 요청하면 불필요한 쓰기가 반복되는 문제
-- 장식장 선택·관찰, 튜토리얼, 모달 UI가 입력과 HUD 상태를 직접 변경하면서 종료 순서에 따라 상태가 잘못 복원될 수 있는 문제
-- 도감에 자연 생성·머지·터치·생산량 등 누적 기록이 추가되면서 데이터 변경 빈도가 크게 늘어난 문제
+- 개수만 저장하던 슬라임 데이터를 `InstanceId` 기반 개체 데이터로 승격하면서 기존 진행도를 유지했습니다.
+- 로컬·클라우드 읽기 실패를 신규 데이터와 구분해, 읽지 못한 진행도를 첫 저장으로 덮어쓰지 않도록 했습니다.
+- 클릭과 자동 생산으로 저장 요청이 계속 발생해도 Firestore 저장이 멈추지 않도록 debounce를 throttle로 교체했습니다.
+- 가챠에서 티켓을 먼저 소비해 결과 생성 실패 시 재화를 잃는 순서를 제거했습니다.
+- 장식장·튜토리얼·모달이 동시에 입력과 HUD를 제어해도 종료 순서에 따라 화면이 잠기지 않도록 owner 기반 요청으로 분리했습니다.
 
 ## 구조 요약
 
 ```mermaid
 flowchart TD
-    A[Legacy Grade + Count Save] --> B[SchemaVersion 확인]
-    B --> C[Save Data Migration]
-    C --> D[InstanceId + Grade + Location]
+    A[Legacy grade/count save] --> B[Schema validation and promotion]
+    B --> C[InstanceId-based slime data]
 
-    D --> E[HybridRepository]
-    E --> F[PlayerPrefs 즉시 저장]
-    E --> G[Firestore 0.6초 디바운스]
-    F --> H[LastSaveTime 비교]
-    G --> H
+    C --> D[HybridRepository]
+    D --> E[PlayerPrefs immediate save]
+    D --> F[Firestore 5-second throttle]
+    D --> G[Loaded / NotFound / Failed]
 
-    I[Selection / Tutorial / Modal] --> J[Clicker 요청 등록]
-    J --> K[Priority 기준 입력 모드 선택]
+    H[Gacha request] --> I[Unlock, ticket, field room, candidate validation]
+    I --> J[EconomyTransactionService]
+    J --> K[Spend only after final validation]
+    K --> L[Refund when spawn fails]
 
-    I --> L[HudVisibility 요청 등록]
-    L --> M[남은 요청 기준 HUD 상태 유지]
-
-    N[Spawn / Merge / Touch / Production] --> O[NormalSlimeCollectionStats]
-    O --> P[Dirty]
-    P --> Q[30초 / Pause / Quit 저장]
+    M[Selection / tutorial / modal] --> N[Owner-based input and HUD requests]
+    N --> O[Effective state recalculation]
 ```
 
-## 폴더
+## 코드 사례
 
-| 폴더 | 내용 |
+| 폴더 | 핵심 주제 |
 |---|---|
-| [SaveDataMigration](./SaveDataMigration/README.md) | 등급별 Count 저장을 InstanceId 기반 개체 저장으로 전환하고 SchemaVersion 기반 마이그레이션을 수행합니다. |
-| [HybridRepository](./HybridRepository/README.md) | PlayerPrefs 즉시 저장, Firestore 디바운스 저장, 병렬 로드와 최신 데이터 선택을 담당합니다. |
-| [InputUIState](./InputUIState/README.md) | owner·priority 기반 입력 요청과 owner별 HUD 숨김 요청으로 기능 간 상태 충돌을 줄입니다. |
-| [CollectionData](./CollectionData/README.md) | 도감의 등급별 누적 기록을 집계하고 Dirty 상태와 저장 주기로 저장 빈도를 관리합니다. |
+| [SaveDataMigration](./SaveDataMigration/README.md) | v0 count 저장부터 v15까지의 스키마 승격과 상위 버전 차단 |
+| [HybridRepository](./HybridRepository/README.md) | 로컬 우선 저장, 클라우드 throttle, 실패를 보존하는 로드 결과 |
+| [GachaTransaction](./GachaTransaction/README.md) | 티켓 소비·슬라임 생성의 순서 보장과 실패 환불 |
+| [InputUIState](./InputUIState/README.md) | owner·priority 기반 월드 입력과 HUD 상태 충돌 방지 |
+| [CollectionData](./CollectionData/README.md) | 도감·플레이 기록 집계와 졸업 시점 통계 스냅샷 |
 
-## 핵심 구현 기준 읽기 순서
+## 권장 읽기 순서
 
-### 개체 저장과 마이그레이션
+1. [HybridRepository](./HybridRepository/README.md): 읽기 실패를 진행도 손실로 이어지지 않게 만든 저장 정책
+2. [SaveDataMigration](./SaveDataMigration/README.md): 저장 구조가 확장될 때의 호환 전략
+3. [GachaTransaction](./GachaTransaction/README.md): 게임플레이 보상에서 소비와 생성의 순서 보장
+4. [InputUIState](./InputUIState/README.md): 기능 간 UI 상태 충돌을 줄인 방식
+5. [CollectionData](./CollectionData/README.md): 누적 기록과 엔딩 통계를 도메인에 귀속한 방식
 
-1. [`ISaveData.cs`](./SaveDataMigration/ISaveData.cs)
-2. [`SlimeInstanceSaveData.cs`](./SaveDataMigration/SlimeInstanceSaveData.cs)
-3. [`SlimeStatusSaveData.cs`](./SaveDataMigration/SlimeStatusSaveData.cs)
-4. [`PlayerPrefsSlimeStatusRepository.cs`](./SaveDataMigration/PlayerPrefsSlimeStatusRepository.cs)
-5. [`FirebaseSlimeStatusRepository.cs`](./SaveDataMigration/FirebaseSlimeStatusRepository.cs)
+## 플랫폼 및 검증 범위
 
-### 로컬·클라우드 저장
-
-6. [`IRepository.cs`](./HybridRepository/IRepository.cs)
-7. [`HybridRepository.cs`](./HybridRepository/HybridRepository.cs)
-
-### 입력·UI 상태 관리
-
-8. [`ClickerInputMode.cs`](./InputUIState/ClickerInputMode.cs)
-9. [`Clicker.cs`](./InputUIState/Clicker.cs)
-10. [`HudVisibility.cs`](./InputUIState/HudVisibility.cs)
-
-### 도감 누적 기록
-
-11. [`NormalSlimeCollectionStats.cs`](./CollectionData/NormalSlimeCollectionStats.cs)
-12. [`SlimeManager.cs`](./CollectionData/SlimeManager.cs)
-
-## 주요 의존성
-
-- Unity 6
-- UniTask
-- Firebase Authentication / Firestore
-- Google Play Games
-- PlayerPrefs / Newtonsoft.Json
-- DOTween 및 프로젝트 공용 풀 시스템
-
-## 설계 포인트
-
-- 같은 등급의 슬라임도 개별 위치와 정보를 유지할 수 있도록 `InstanceId` 기반 개체 저장 구조로 전환했습니다.
-- `SchemaVersion`을 도메인별로 관리하고, 구버전 저장 데이터는 마이그레이션·정규화한 뒤 현재 구조로 다시 저장합니다.
-- 현재 앱보다 높은 저장 버전은 이전 앱에서 덮어쓰지 않도록 로드를 차단합니다.
-- 데이터 변경은 PlayerPrefs에 즉시 저장하고 Firestore 요청은 0.6초 디바운스로 합칩니다.
-- 로드 시 PlayerPrefs와 Firestore를 병렬 조회하고 `LastSaveTime`을 기준으로 최신 진행 데이터를 선택합니다.
-- 입력 상태는 owner별 요청과 `Space < Selection < Tutorial < Modal` 우선순위로 관리합니다.
-- HUD는 owner별 숨김 요청을 누적해 다른 기능의 요청이 남아 있으면 숨김 상태를 유지합니다.
-- 도감 누적 기록은 이벤트마다 즉시 저장하지 않고 Dirty 상태로 표시한 뒤 30초 주기와 Pause·Quit 시점에 저장합니다.
-
-## 플랫폼 정책
-
-- Android 실제 빌드: Firebase UID 기준 PlayerPrefs + Firestore를 결합한 Hybrid Repository
-- Editor / 비 Android 환경: 로컬 Repository로 개발·테스트
-- Google Play Games 로그인 → Firebase Authentication → Firebase UID를 사용자 데이터 식별 기준으로 사용
-- 계정 삭제 시 Firebase Authentication 사용자, 현재 UID의 Firestore 진행 데이터, 로컬 진행·튜토리얼 데이터를 함께 삭제
-
-## 인증 구성
-
-Google Play Games 로그인부터 Firebase Authentication, Firebase UID 연결까지의 환경 구성 과정은 개발 블로그에 정리했습니다.
-
-- [Google Play Games · Firebase 인증 환경 구성 과정](https://velog.io/@gom_in/Monster-Kindergarten-1-Play-Games%EC%99%80-Firebase-%EC%9D%B8%EC%A6%9D-%ED%99%98%EA%B2%BD-%EA%B5%AC%EC%84%B1%ED%95%98%EA%B8%B0)
+- Android에서는 Google Play Games 로그인 후 Firebase Authentication UID를 저장 소유자로 사용합니다.
+- Editor와 비 Android 환경은 `LocalAccountRepository` 및 로컬 저장소로 동작합니다.
+- 최신 릴리스 AAB는 생성했지만, `0.1.14`와 `0.1.15`에서 처음 들어간 기능의 실제 Android 기기 검증과 Play Console 제출은 별도 진행 항목입니다.
 
 ## 공개 범위
 
-포트폴리오 저장소에는 저장 구조, 마이그레이션, 입력·HUD 상태 관리, 도감 누적 기록 설계를 이해하는 데 필요한 코드만 선별했습니다.  
-Google Play Console 설정, Firebase 프로젝트 설정, 전체 UI·연출 구현, 프리팹과 기타 공용 시스템은 전체 프로젝트 및 개발 기록에서 확인할 수 있습니다.
+포트폴리오에는 본인이 작성한 핵심 코드와 이해에 필요한 최소 계약만 포함했습니다. 씬·프리팹·ScriptableObject, 외부 SDK, Firebase/Play Console 설정 및 전체 게임 에셋은 제외되어 샘플만으로 실행되지는 않습니다.
 
-최신 원본 프로젝트:
-https://github.com/jjh770/MonsterKindergarten
+최신 원본 프로젝트: https://github.com/jjh770/MonsterKindergarten

@@ -1,4 +1,4 @@
-public interface ISaveData
+﻿public interface ISaveData
 {
     int SchemaVersion { get; set; }
     string LastSaveTime { get; set; }
@@ -6,15 +6,30 @@ public interface ISaveData
 
 public static class SaveSchema
 {
-    // 저장 구조를 변경할 때 해당 도메인의 버전을 올리고, 이전 버전의 승격 로직을 함께 추가한다.
-    // 각 저장소는 CurrentVersion보다 높은 데이터를 로드하거나 덮어쓰지 않도록 차단한다.
+    // 저장 구조를 변경할 때 GameDataDomains의 해당 버전을 올리고, 이전 버전의
+    // 승격 로직을 함께 추가한다. 각 저장소는 등록된 현재 버전보다 높은 데이터를
+    // 로드하거나 덮어쓰지 않도록 차단한다.
     // SchemaVersion 필드가 없는 기존 저장 데이터는 LegacyVersion으로 로드된다.
     public const int LegacyVersion = 0;
-    public const int CurrencyCurrentVersion = 1;
     // v2: ActiveSlimes를 등급별 개수에서 SlimeInstance 목록으로 전환했다.
     public const int SlimeInstanceVersion = 2;
     // v3: 일반 슬라임 도감 등록 상태를 추가했다.
     // v4: 도감에 표시할 등급별 누적 통계를 추가했다.
-    public const int SlimeCurrentVersion = 4;
-    public const int UpgradeCurrentVersion = 1;
+    // v5: 미수령 가챠권 수를 스테이지별로 추가했다.
+    // v6: 자동 스폰 설정을 추가했다.
+    // v7: 메인 엔딩 확인 여부와 스페셜 가챠 피버 실패 횟수를 추가했다.
+    // v8: 완료한 튜토리얼 목록을 추가했다. 로컬 표시만으로는 재설치 뒤 다시 나왔다.
+    // v9: 현재 스테이지를 선택한 배경 테마로, 하늘 진입 완료를 배경 해금 연출 완료로
+    // 전환하고 스테이지별 미수령 티켓을 한 수량으로 합쳤다.
+    // v10: 장식장에 놓은 놀이터 오브젝트, 사 둔 오브젝트 수, 사 둔 배경 테마를
+    // 추가했다. 세 필드 모두 없으면 빈 목록으로 읽히고 그것이 "아무것도 사지 않은"
+    // 정확한 상태라, 승격 함수에서 채울 것이 없다.
+    // v11의 이전 문서는 최초 도감 등록일을 우선 사용하고, 기록이 없으면
+    // 승격 시각으로 게임 시작일을 채운다.
+    // v12: 특별한 슬라임 도감 등록 상태를 추가했다. 특별 도감이 없어진 뒤로는 읽기 전용이다.
+    // 등록한 등급은 로드할 때 일반 도감 등록으로 옮기고 새 저장에는 빈 목록을 쓴다.
+    // v13: 특별한 슬라임 도감의 등급별 기록을 추가했다. 이것도 읽지 않고 빈 목록을 쓴다.
+    // 필드를 지우거나 버전을 올리지 않은 것은 이미 저장된 문서가 그대로 읽혀야 해서다.
+    // v14: 등급별 가챠 획득 횟수를 추가했다. 필드가 없으면 0으로 채운 목록으로 읽히고 그것이
+    // "기록 없음"이라 승격 함수에서 채울 것이 없다.
 }

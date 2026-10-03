@@ -171,4 +171,5 @@ public sealed class HudVisibility : MonoBehaviour
             Parts = parts;
         }
     }
+
 }

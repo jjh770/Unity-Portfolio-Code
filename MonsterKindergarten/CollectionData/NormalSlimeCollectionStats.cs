@@ -8,19 +8,22 @@ public readonly struct NormalSlimeCollectionStatsSnapshot
     public long MergeCreatedCount { get; }
     public long ManualTouchCount { get; }
     public double ProducedPointTotal { get; }
+    public long GachaObtainedCount { get; }
 
     public NormalSlimeCollectionStatsSnapshot(
         string firstRegisteredAt,
         long naturalSpawnCount,
         long mergeCreatedCount,
         long manualTouchCount,
-        double producedPointTotal)
+        double producedPointTotal,
+        long gachaObtainedCount)
     {
         FirstRegisteredAt = firstRegisteredAt;
         NaturalSpawnCount = naturalSpawnCount;
         MergeCreatedCount = mergeCreatedCount;
         ManualTouchCount = manualTouchCount;
         ProducedPointTotal = producedPointTotal;
+        GachaObtainedCount = gachaObtainedCount;
     }
 }
 
@@ -31,6 +34,7 @@ public sealed class NormalSlimeCollectionStats
     private readonly long[] _mergeCreatedCounts;
     private readonly long[] _manualTouchCounts;
     private readonly double[] _producedPointTotals;
+    private readonly long[] _gachaObtainedCounts;
 
     public NormalSlimeCollectionStats(SlimeStatusSaveData saveData)
     {
@@ -44,6 +48,7 @@ public sealed class NormalSlimeCollectionStats
         _mergeCreatedCounts = saveData.NormalMergeCreatedCounts.ToArray();
         _manualTouchCounts = saveData.NormalManualTouchCounts.ToArray();
         _producedPointTotals = saveData.NormalProducedPointTotals.ToArray();
+        _gachaObtainedCounts = saveData.NormalGachaObtainedCounts.ToArray();
     }
 
     public NormalSlimeCollectionStatsSnapshot Get(ESlimeGrade grade)
@@ -54,7 +59,8 @@ public sealed class NormalSlimeCollectionStats
             _naturalSpawnCounts[index],
             _mergeCreatedCounts[index],
             _manualTouchCounts[index],
-            _producedPointTotals[index]);
+            _producedPointTotals[index],
+            _gachaObtainedCounts[index]);
     }
 
     public bool RecordRegistration(ESlimeGrade grade, DateTime registeredAtUtc)
@@ -69,6 +75,12 @@ public sealed class NormalSlimeCollectionStats
     public void RecordNaturalSpawn(ESlimeGrade grade)
     {
         Increment(_naturalSpawnCounts, GetIndex(grade));
+    }
+
+    // 가챠 결과로 태어난 슬라임을 센다. 특별한 슬라임도 같은 등급의 한 칸에 들어간다.
+    public void RecordGachaObtained(ESlimeGrade grade)
+    {
+        Increment(_gachaObtainedCounts, GetIndex(grade));
     }
 
     public void RecordMergeCreated(ESlimeGrade grade)
@@ -100,6 +112,7 @@ public sealed class NormalSlimeCollectionStats
     public List<long> BuildMergeCreatedCounts() => new(_mergeCreatedCounts);
     public List<long> BuildManualTouchCounts() => new(_manualTouchCounts);
     public List<double> BuildProducedPointTotals() => new(_producedPointTotals);
+    public List<long> BuildGachaObtainedCounts() => new(_gachaObtainedCounts);
 
     private static void Increment(long[] values, int index)
     {

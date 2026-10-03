@@ -10,7 +10,7 @@
 | [Don’t Dilly-Dally!](./DontDillyDally/README.md) | Photon PUN2 기반 권한·상태 동기화와 스테이지 초기화 | ACK 재동기화, 아이템 소유권, 권위 기반 제출 판정 |
 | [Beat & Buddy](./BeatAndBuddy/README.md) | 오디오 시간축 기반 리듬 시스템과 채보 데이터 파이프라인 | `dspTime`, Beat 기반 노트 이동, `.osu` 파싱 |
 | [Flora333](./Flora333/README.md) | 기능 확장을 고려한 플레이어 컴포넌트 구조 | FSM, 입력 이벤트 분리, 상호작용·스킬 시스템 |
-| [Monster Kindergarten](./MonsterKindergarten/README.md) | 저장소 추상화와 도메인 중심 게임 데이터 관리 | Hybrid Repository, 도메인 규칙, 클릭·머지 루프 |
+| [Monster Kindergarten](./MonsterKindergarten/README.md) | 안전한 저장 동기화와 확장형 방치·머지 게임플레이 | Hybrid Repository, 스키마 승격, 가챠 트랜잭션, 입력 상태 관리 |
 
 ## 저장소 구성 원칙
 

@@ -34,7 +34,7 @@ public readonly struct ClickerInputMode
     // 대사, 팝업, 연출 중 월드 입력을 완전히 막는다.
     public static ClickerInputMode Blocked => new(false, false);
 
-    // 메인 스테이지 평상시. 터치 포인트와 드래그 합성을 모두 허용한다.
+    // 메인 필드 평상시. 터치 포인트와 드래그 합성을 모두 허용한다.
     public static ClickerInputMode Free => new(true, true);
 
     // 선택만 허용한다. 클릭 포인트는 지급하지 않는다.
