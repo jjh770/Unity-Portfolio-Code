@@ -1,4 +1,4 @@
-# Monster Kindergarten — Code Samples
+# 슬라임 유치원 (구 Monster Kindergarten) — Code Samples
 
 1인 개발 Android 방치형 머지·수집 게임의 핵심 코드입니다. 단순 기능 나열보다, 콘텐츠가 늘어나는 과정에서 진행 데이터를 안전하게 확장하고 여러 UI·연출의 상태 충돌을 막은 설계 판단을 중심으로 선별했습니다.
 
@@ -9,7 +9,7 @@
 | 개발 형태 | 1인 개발 |
 | 개발 시기 | 2026.01.26 ~ 2026.02.10 (초기 제작) / 2026.08 ~ 현재 (출시 개발) |
 | 담당 범위 | 기획, Unity 클라이언트 개발, 데이터·저장 구조 설계, Android 인증·배포 연동 |
-| 개발 환경 | Unity 6, C#, UniTask, Firebase Auth·Firestore, Google Play Games |
+| 개발 환경 | Unity 6, C#, UniTask, Firebase Auth, Firestore, Firebase Analytics, Google Play Games, Google Mobile Ads |
 | 대상 플랫폼 | Android |
 | 최신 빌드 | `0.1.15` / Android Version Code `17` (2026-10-02 AAB 생성, 트랙 제출·기기 검증 대기) |
 
@@ -20,6 +20,7 @@
 - 클릭과 자동 생산으로 저장 요청이 계속 발생해도 Firestore 저장이 멈추지 않도록 debounce를 throttle로 교체했습니다.
 - 가챠에서 티켓을 먼저 소비해 결과 생성 실패 시 재화를 잃는 순서를 제거했습니다.
 - 장식장·튜토리얼·모달이 동시에 입력과 HUD를 제어해도 종료 순서에 따라 화면이 잠기지 않도록 owner 기반 요청으로 분리했습니다.
+- 보상형 광고는 SDK 호출, 보상 규칙, 분석 기록을 나눠 광고나 분석이 실패해도 보상 지급과 게임 진행이 막히지 않도록 했고, 동의 전에는 광고 SDK가 초기화되지 않게 했습니다.
 
 ## 구조 요약
 
@@ -40,6 +41,11 @@ flowchart TD
 
     M[Selection / tutorial / modal] --> N[Owner-based input and HUD requests]
     N --> O[Effective state recalculation]
+
+    P[Rewarded ad request] --> Q[Availability: unlock, daily limit, ready]
+    Q --> R[IAdService: AdMob / Fake / Null]
+    R --> S[Grant only on reward signal]
+    R --> T[AdAnalytics: failures never block reward]
 ```
 
 ## 코드 사례
@@ -51,6 +57,7 @@ flowchart TD
 | [GachaTransaction](./GachaTransaction/README.md) | 티켓 소비·슬라임 생성의 순서 보장과 실패 환불 |
 | [InputUIState](./InputUIState/README.md) | owner·priority 기반 월드 입력과 HUD 상태 충돌 방지 |
 | [CollectionData](./CollectionData/README.md) | 도감·플레이 기록 집계와 졸업 시점 통계 스냅샷 |
+| [AdsAndAnalytics](./AdsAndAnalytics/README.md) | 보상형 광고 SDK 추상화, 보상 지급 규칙, Firebase Analytics 광고 지표, 동의 전 초기화 차단 |
 
 ## 권장 읽기 순서
 
@@ -59,6 +66,7 @@ flowchart TD
 3. [GachaTransaction](./GachaTransaction/README.md): 게임플레이 보상에서 소비와 생성의 순서 보장
 4. [InputUIState](./InputUIState/README.md): 기능 간 UI 상태 충돌을 줄인 방식
 5. [CollectionData](./CollectionData/README.md): 누적 기록과 엔딩 통계를 도메인에 귀속한 방식
+6. [AdsAndAnalytics](./AdsAndAnalytics/README.md): 외부 SDK가 실패해도 보상과 진행을 지키는 광고와 지표 연동
 
 ## 플랫폼 및 검증 범위
 
